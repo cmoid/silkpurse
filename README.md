@@ -1,3 +1,17 @@
+# Silkpurse
+
+They you can't make a silk purse out of a sow's ear.
+
+They say you shouldn't play in the elephant graveyard, it's not safe.
+
+These things are true.
+
+"**If you do, against all advice, want to continue developing Patchwork** then we kindly request you rename it to reflect the change in leadership."
+
+Well that was easy to do, silkpurse is a fork of patchwork.
+
+# Archive readme
+
 # :warning: **Patchwork v3.18.1 was the last release!** :warning:
 
 This release is meant to tide us over so that other clients can take it from here.

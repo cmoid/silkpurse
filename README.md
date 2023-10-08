@@ -1,6 +1,6 @@
 # Silkpurse
 
-They you can't make a silk purse out of a sow's ear.
+They say you can't make a silk purse out of a sow's ear.
 
 They say you shouldn't play in the elephant graveyard, it's not safe.
 

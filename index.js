@@ -158,30 +158,29 @@ electron.app.on('ready', () => {
   })
 
   electron.ipcMain.handle('navigation-menu-popup', (event, data) => {
-    const {items, x, y} = data
+    const { items, x, y } = data
     const window = event.sender
     const factor = event.sender.zoomFactor
     const menuItems = buildMenu(items, window)
-    const menu = electron.Menu.buildFromTemplate(menuItems);
+    const menu = electron.Menu.buildFromTemplate(menuItems)
     menu.popup({
       window,
       x: Math.round(x * factor),
-      y: Math.round(y * factor) + 4,
-    });
+      y: Math.round(y * factor) + 4
+    })
   })
 
   electron.ipcMain.handle('setSpellcheckLangs', (ev, params) => {
     if (!windows.main) { return }
     const { langs, enabled } = params
-    windows.main.webContents.session.setSpellCheckerLanguages(enabled ? langs : []);
+    windows.main.webContents.session.setSpellCheckerLanguages(enabled ? langs : [])
   })
   electron.ipcMain.handle('consoleLog', (ev, o) => console.log(o))
   electron.ipcMain.handle('consoleError', (ev, o) => console.error(o))
   electron.ipcMain.handle('badgeCount', (ev, count) => {
-    electron.app.badgeCount = count;
-  });
+    electron.app.badgeCount = count
+  })
   electron.ipcMain.on('exit', (ev, code) => process.exit(code))
-
 })
 
 function openServerDevTools () {
@@ -190,9 +189,9 @@ function openServerDevTools () {
   }
 }
 
-function buildMenu(items, window) {
+function buildMenu (items, window) {
   const result = []
-  for (let item of items) {
+  for (const item of items) {
     switch (item.type) {
       case 'separator':
         result.push(item)
@@ -200,7 +199,7 @@ function buildMenu(items, window) {
       case 'submenu':
         result.push({
           ...item,
-          submenu: buildMenu(item.submenu, window),
+          submenu: buildMenu(item.submenu, window)
         })
         break
       case 'normal':
@@ -210,13 +209,13 @@ function buildMenu(items, window) {
         })
         break
       default:
-        throw Error(`Unknown menu item of type "${item.type}": ${JSON.stringify(item, null, 2)}`);
+        throw Error(`Unknown menu item of type "${item.type}": ${JSON.stringify(item, null, 2)}`)
     }
   }
   return result
 }
 
-function navigateTo(target) {
+function navigateTo (target) {
   if (windows?.main) {
     windows.main.send('navigate-to', target)
   }
@@ -239,10 +238,10 @@ function openMainWindow () {
       title: 'Patchwork',
       show: true,
       backgroundColor: '#EEE',
-      icon: Path.join(__dirname, 'assets/icon.png'),
+      icon: Path.join(__dirname, 'assets/icon.png')
     },
     openServerDevTools,
-    navigateTo,
+    navigateTo
     )
 
     windowState.manage(windows.main)

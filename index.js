@@ -51,7 +51,7 @@ if (process.argv.includes('--path')) {
 quitIfAlreadyRunning()
 
 electron.app.on('ready', () => {
-  setupContext(process.env.ssb_appname || 'ssb', {
+  setupContext(process.env.ssb_appname || 'silkpurse', {
     server: !(process.argv.includes('-g') || process.argv.includes('--use-global-ssb'))
   }, () => {
     const browserWindow = openMainWindow()
@@ -263,7 +263,7 @@ function openMainWindow () {
 
 function setupContext (appName, opts, cb) {
   ssbConfig = require('ssb-config/inject')(appName, extend({
-    port: 8008,
+    port: 8087,
     blobsPort: 8989, // matches ssb-ws
     friends: { // not using ssb-friends (sbot/contacts fixes hops at 2, so this setting won't do anything)
       dunbar: 150,

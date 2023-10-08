@@ -4,3 +4,6 @@ dist
 # Mac OS metadata file
 .DS_Store
 
+# Markdown preview
+README.html
+

@@ -108,6 +108,5 @@
     "electron": "^11.3.0",
     "electron-builder": "^22.9.1",
     "standard": "^16.0.3"
-  },
-  "optionalDependencies": {}
+  }
 }

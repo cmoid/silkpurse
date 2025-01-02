@@ -7,3 +7,5 @@ dist
 # Markdown preview
 README.html
 
+# emacs backups
+*~

@@ -30,7 +30,7 @@ let quitting = false;
  */
 function quitIfAlreadyRunning() {
   if (!electron.app.requestSingleInstanceLock()) {
-    console.log("Patchwork is already running!");
+    console.log("Silkpurse is already running!");
     console.log(
       "Please close the existing instance before starting a new one.",
     );
@@ -255,7 +255,7 @@ function openMainWindow() {
           height: windowState.height,
           titleBarStyle: "hiddenInset",
           autoHideMenuBar: true,
-          title: "Patchwork",
+          title: "Silkpurse",
           webPreferences: {
             nodeIntegration: true,
             contextIsolation: false,

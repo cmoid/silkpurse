@@ -1,7 +1,7 @@
 directories:
   output: dist
   buildResources: build
-appId: org.ssbc.patchwork
+appId: org.cmoid.silkpurse
 
 linux:
   category: Network

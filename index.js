@@ -14,6 +14,8 @@ const Menu = electron.Menu;
 const extend = require("xtend");
 const ssbKeys = require("ssb-keys");
 
+require("@electron/remote/main").initialize();
+
 const windows = {
   dialogs: new Set(),
 };
@@ -60,6 +62,7 @@ electron.app.on("ready", () => {
       process.argv.includes("--use-global-ssb")),
   }, () => {
     const browserWindow = openMainWindow();
+    require("@electron/remote/main").enable(browserWindow.webContents)
 
     browserWindow.on("app-command", (e, cmd) => {
       switch (cmd) {

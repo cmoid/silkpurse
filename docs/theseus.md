@@ -19,6 +19,8 @@ from `./scripts/metrics.sh [ref]`:
 | remove gatherings            | 7baa86ba | 13,214 (142)    | 4,446  | 82 + 5  | 1,556     |
 | remove old ssb-search        | cf83e8a3 | 13,006 (141)    | 4,446  | 81 + 5  | 1,549     |
 | remove update banner         | ede43e7b | 12,936 (140)    | 4,446  | 80 + 5  | 1,549     |
+| remove blog rendering        | 9aa99531 | 12,835 (139)    | 4,379  | 79 + 5  | 1,541     |
+| remove dht invites           | 08b36e31 | 12,821 (139)    | 4,379  | 78 + 5  | 1,490     |
 
 Notes:
 

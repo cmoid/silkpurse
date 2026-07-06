@@ -368,5 +368,33 @@ function setupContext(appName, opts, cb) {
     //   ev.preventDefault()
     //   windows.background.hide()
     // })
+
+    // Relay full-text search IPC between the main window and the hidden
+    // server window, which owns the SQLite search index.
+    electron.ipcMain.on("search", (ev, terms) => {
+      windows.background.webContents.send("search", terms);
+    });
+
+    electron.ipcMain.on("is-search-available", (ev, terms) => {
+      windows.background.webContents.send("is-search-available", terms);
+    });
+
+    electron.ipcMain.on("search-results", (ev, results) => {
+      if (windows.main) {
+        windows.main.webContents.send("search-results", results);
+      }
+    });
+
+    electron.ipcMain.on("search-unavailable", (ev) => {
+      if (windows.main) {
+        windows.main.webContents.send("search-unavailable");
+      }
+    });
+
+    electron.ipcMain.on("search-available", (ev) => {
+      if (windows.main) {
+        windows.main.webContents.send("search-available");
+      }
+    });
   }
 }

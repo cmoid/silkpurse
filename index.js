@@ -327,9 +327,6 @@ function setupContext(appName, opts, cb) {
   }];
   ssbConfig.connections.outgoing.tunnel = [{ transform: "shs" }];
 
-  // Support DHT invites (only as a client, for now)
-  ssbConfig.connections.outgoing.dht = [{ transform: "shs" }];
-
   const redactedConfig = JSON.parse(JSON.stringify(ssbConfig));
   redactedConfig.keys.private = null;
   console.dir(redactedConfig, { depth: null });

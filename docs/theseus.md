@@ -17,7 +17,7 @@ from `./scripts/metrics.sh [ref]`:
 | electron 39 + sqlite search + rebrand | f30e7640 | 14,736 (156) | 4,816 | 86 + 5 | 1,564 |
 | remove tags                  | 2d04759a | 14,103 (149)    | 4,596  | 84 + 5  | 1,558     |
 | remove gatherings            | 7baa86ba | 13,214 (142)    | 4,446  | 82 + 5  | 1,556     |
-| remove old ssb-search        | 1bd7c7b1 | 13,006 (141)    | 4,446  | 81 + 5  | 1,549     |
+| remove old ssb-search        | cf83e8a3 | 13,006 (141)    | 4,446  | 81 + 5  | 1,549     |
 
 Notes:
 

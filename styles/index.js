@@ -2,7 +2,7 @@ const path = require('path')
 const fs = require('fs')
 const compile = require('micro-css')
 
-const vendorPaths = [require.resolve('flatpickr/dist/flatpickr.css')]
+const vendorPaths = []
 const vendorCss = vendorPaths.map((vendorPath) => fs.readFileSync(vendorPath, 'utf8'))
 
 const theme = (themeName) => {

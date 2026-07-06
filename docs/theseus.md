@@ -18,6 +18,7 @@ from `./scripts/metrics.sh [ref]`:
 | remove tags                  | 2d04759a | 14,103 (149)    | 4,596  | 84 + 5  | 1,558     |
 | remove gatherings            | 7baa86ba | 13,214 (142)    | 4,446  | 82 + 5  | 1,556     |
 | remove old ssb-search        | cf83e8a3 | 13,006 (141)    | 4,446  | 81 + 5  | 1,549     |
+| remove update banner         | ede43e7b | 12,936 (140)    | 4,446  | 80 + 5  | 1,549     |
 
 Notes:
 

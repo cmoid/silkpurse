@@ -3,6 +3,11 @@ directories:
   buildResources: build
 appId: org.cmoid.silkpurse
 
+# All native deps are N-API with working prebuilds; rebuilding breaks on
+# chloride's vendored sodium-native, which tries to fetch libsodium source
+# from a URL that no longer exists.
+npmRebuild: false
+
 linux:
   category: Network
   target:

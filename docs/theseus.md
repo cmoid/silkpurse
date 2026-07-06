@@ -21,6 +21,7 @@ from `./scripts/metrics.sh [ref]`:
 | remove update banner         | ede43e7b | 12,936 (140)    | 4,446  | 80 + 5  | 1,549     |
 | remove blog rendering        | 9aa99531 | 12,835 (139)    | 4,379  | 79 + 5  | 1,541     |
 | remove dht invites           | 08b36e31 | 12,821 (139)    | 4,379  | 78 + 5  | 1,490     |
+| remove git-ssb integration   | c670bca9 | 12,748 (138)    | 4,379  | 77 + 5  | 1,472     |
 
 Notes:
 

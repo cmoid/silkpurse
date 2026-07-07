@@ -22,6 +22,8 @@ from `./scripts/metrics.sh [ref]`:
 | remove blog rendering        | 9aa99531 | 12,835 (139)    | 4,379  | 79 + 5  | 1,541     |
 | remove dht invites           | 08b36e31 | 12,821 (139)    | 4,379  | 78 + 5  | 1,490     |
 | remove git-ssb integration   | c670bca9 | 12,748 (138)    | 4,379  | 77 + 5  | 1,472     |
+| packaging fixes (require-style et al) | db026ba1 | 12,798 (139) | 4,379 | 76 + 5 | 1,468 |
+| remove depject               | a7360a74 | 12,173 (142)    | 4,379  | 73 + 5  | 1,413     |
 
 Notes:
 
@@ -33,6 +35,12 @@ Notes:
 - Lockfile count barely moves on feature removals because most transitive
   deps are shared with the remaining ssb stack; the big wins there will
   come from replacing the embedded ssb-server with erlbutt.
+- The depject removal cut ~625 lines of gives/needs/nest ceremony while
+  *adding* 3 files (plug.js dispatch, the plug-keys.js socket table, and
+  a vendored lib/settings.js replacing patch-settings), dropped 3 deps
+  (depject, depnest, patch-settings) and 55 lockfile packages. Module
+  wiring is now explicit: `grep "api\.sbot\."` shows the exact server
+  surface the UI consumes — the input list for the erlbutt backend swap.
 
 ## Older notes (pre-revival, 3.18.1 era)
 

@@ -24,6 +24,7 @@ from `./scripts/metrics.sh [ref]`:
 | remove git-ssb integration   | c670bca9 | 12,748 (138)    | 4,379  | 77 + 5  | 1,472     |
 | packaging fixes (require-style et al) | db026ba1 | 12,798 (139) | 4,379 | 76 + 5 | 1,468 |
 | remove depject               | a7360a74 | 12,173 (142)    | 4,379  | 73 + 5  | 1,413     |
+| rename lib/depject → lib/ui  | 495e4edf | 12,173 (142)    | 4,379  | 73 + 5  | 1,413     |
 
 Notes:
 

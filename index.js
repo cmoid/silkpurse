@@ -351,13 +351,30 @@ function setupContext(appName, opts, cb) {
   redactedConfig.keys.private = null;
   console.dir(redactedConfig, { depth: null });
 
-  if (opts.server === false) {
+  if (process.env.ERLBUTT_SECRET) {
+    // erlbutt mode: no embedded server.  Start the blob HTTP shim (the
+    // renderer's blob URLs need a localhost endpoint, normally provided
+    // by the embedded server's ssb-ws), then open the hidden window —
+    // server-process.js runs only the search indexer in this mode, fed
+    // from erlbutt over muxrpc.
+    require("./lib/erlbutt-shim")(ssbConfig, (err) => {
+      if (err) {
+        console.log("[erlbutt] blob shim failed to start:", err.message);
+      }
+      spawnBackgroundWindow();
+      cb && cb();
+    });
+  } else if (opts.server === false) {
     cb && cb();
   } else {
     electron.ipcMain.once("server-started", function (ev, config) {
       ssbConfig = config;
       cb && cb();
     });
+    spawnBackgroundWindow();
+  }
+
+  function spawnBackgroundWindow() {
     windows.background = openWindow(
       ssbConfig,
       Path.join(__dirname, "lib", "server-process.js"),

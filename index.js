@@ -259,6 +259,15 @@ function openMainWindow() {
         navigateTo,
       );
 
+      // erlbutt bring-up: forward the renderer console to the main
+      // process stdout so muxrpc / method errors are visible in the log.
+      if (process.env.ERLBUTT_SECRET) {
+        windows.main.webContents.on("console-message",
+          (_e, _level, message, line, sourceId) =>
+            console.log("[renderer]", message,
+                        sourceId ? `(${sourceId}:${line})` : ""));
+      }
+
       windowState.manage(windows.main);
       windows.main.setSheetOffset(40);
       windows.main.on("close", function (e) {
@@ -317,6 +326,26 @@ function setupContext(appName, opts, cb) {
     transform: "shs",
   }];
   ssbConfig.connections.outgoing.tunnel = [{ transform: "shs" }];
+
+  // erlbutt remote mode (Model A): instead of spawning an embedded
+  // ssb-server, become erlbutt's face — authenticate as erlbutt's own
+  // identity and talk muxrpc to it.  Enabled by ERLBUTT_SECRET:
+  //   ERLBUTT_SECRET  path to erlbutt's secret (ssb-keys JSON)
+  //   ERLBUTT_ADDR    host:port of erlbutt's TCP listener (def 127.0.0.1:8008)
+  //   ERLBUTT_SHS     erlbutt's network id / caps.shs (def: unchanged)
+  if (process.env.ERLBUTT_SECRET) {
+    opts.server = false;
+    ssbConfig.keys = ssbKeys.loadOrCreateSync(process.env.ERLBUTT_SECRET);
+    const ek = ssbConfig.keys;
+    const epub = ek.id.slice(1).replace(`.${ek.curve}`, "");
+    const addr = process.env.ERLBUTT_ADDR || "127.0.0.1:8008";
+    ssbConfig.remote = `net:${addr}~shs:${epub}`;
+    if (process.env.ERLBUTT_SHS) {
+      ssbConfig.caps = extend(ssbConfig.caps, { shs: process.env.ERLBUTT_SHS });
+    }
+    console.log("[erlbutt] remote mode:", ssbConfig.remote,
+                "caps.shs:", ssbConfig.caps.shs);
+  }
 
   const redactedConfig = JSON.parse(JSON.stringify(ssbConfig));
   redactedConfig.keys.private = null;

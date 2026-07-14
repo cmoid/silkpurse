@@ -285,6 +285,16 @@ function openMainWindow() {
     return windows.main;
 }
 
+// A startup failure must be VISIBLE.  A packaged app launched from Finder
+// has no terminal, so a console.error alone means the user just sees the
+// icon bounce and vanish with no explanation.  showErrorBox is safe to call
+// before the app is ready.
+function fatal(message) {
+  console.error(message);
+  electron.dialog.showErrorBox("Silkpurse cannot start", message);
+  return electron.app.quit();
+}
+
 function setupContext(appName, opts, cb) {
   ssbConfig = require("ssb-config/inject")(
     appName,
@@ -337,7 +347,12 @@ function setupContext(appName, opts, cb) {
   // The resolved block is stored on ssbConfig, so the background window
   // (server-process.js) sees the same decision — it is handed the config,
   // and cannot be assumed to inherit our environment.
-  const erlbutt = resolveErlbutt(ssbConfig);
+  let erlbutt;
+  try {
+    erlbutt = resolveErlbutt(ssbConfig);
+  } catch (err) {
+    return fatal(err.message);
+  }
   ssbConfig.erlbutt = erlbutt || undefined;
 
   if (erlbutt) {

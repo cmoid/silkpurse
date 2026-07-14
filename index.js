@@ -13,6 +13,7 @@ const WindowState = require("electron-window-state");
 const Menu = electron.Menu;
 const extend = require("xtend");
 const ssbKeys = require("ssb-keys");
+const resolveErlbutt = require("./lib/erlbutt-config.js");
 
 require("@electron/remote/main").initialize();
 
@@ -261,7 +262,7 @@ function openMainWindow() {
 
       // erlbutt bring-up: forward the renderer console to the main
       // process stdout so muxrpc / method errors are visible in the log.
-      if (process.env.ERLBUTT_SECRET) {
+      if (ssbConfig.erlbutt) {
         windows.main.webContents.on("console-message",
           (_e, _level, message, line, sourceId) =>
             console.log("[renderer]", message,
@@ -329,29 +330,38 @@ function setupContext(appName, opts, cb) {
 
   // erlbutt remote mode (Model A): instead of spawning an embedded
   // ssb-server, become erlbutt's face — authenticate as erlbutt's own
-  // identity and talk muxrpc to it.  Enabled by ERLBUTT_SECRET:
-  //   ERLBUTT_SECRET  path to erlbutt's secret (ssb-keys JSON)
-  //   ERLBUTT_ADDR    host:port of erlbutt's TCP listener (def 127.0.0.1:8008)
-  //   ERLBUTT_SHS     erlbutt's network id / caps.shs (def: unchanged)
-  if (process.env.ERLBUTT_SECRET) {
+  // identity and talk muxrpc to it.  Settings come from the environment
+  // or from an "erlbutt" block in ~/.silkpurse/config (see
+  // lib/erlbutt-config.js); no settings at all means local mode.
+  //
+  // The resolved block is stored on ssbConfig, so the background window
+  // (server-process.js) sees the same decision — it is handed the config,
+  // and cannot be assumed to inherit our environment.
+  const erlbutt = resolveErlbutt(ssbConfig);
+  ssbConfig.erlbutt = erlbutt || undefined;
+
+  if (erlbutt) {
     opts.server = false;
-    ssbConfig.keys = ssbKeys.loadOrCreateSync(process.env.ERLBUTT_SECRET);
+    ssbConfig.keys = ssbKeys.loadSync(erlbutt.secret);
     const ek = ssbConfig.keys;
     const epub = ek.id.slice(1).replace(`.${ek.curve}`, "");
-    const addr = process.env.ERLBUTT_ADDR || "127.0.0.1:8008";
-    ssbConfig.remote = `net:${addr}~shs:${epub}`;
-    if (process.env.ERLBUTT_SHS) {
-      ssbConfig.caps = extend(ssbConfig.caps, { shs: process.env.ERLBUTT_SHS });
+    ssbConfig.remote = `net:${erlbutt.addr}~shs:${epub}`;
+    if (erlbutt.shs) {
+      ssbConfig.caps = extend(ssbConfig.caps, { shs: erlbutt.shs });
     }
-    console.log("[erlbutt] remote mode:", ssbConfig.remote,
-                "caps.shs:", ssbConfig.caps.shs);
+    console.log(`[erlbutt] remote mode (from ${erlbutt.source}):`,
+                ssbConfig.remote, "caps.shs:", ssbConfig.caps.shs);
+  } else {
+    // Say so out loud: a packaged app that quietly fell back to the
+    // embedded server would look like erlbutt "losing" all your data.
+    console.log("[erlbutt] local mode — embedded server at", ssbConfig.path);
   }
 
   const redactedConfig = JSON.parse(JSON.stringify(ssbConfig));
   redactedConfig.keys.private = null;
   console.dir(redactedConfig, { depth: null });
 
-  if (process.env.ERLBUTT_SECRET) {
+  if (erlbutt) {
     // erlbutt mode: no embedded server.  Start the blob HTTP shim (the
     // renderer's blob URLs need a localhost endpoint, normally provided
     // by the embedded server's ssb-ws), then open the hidden window —

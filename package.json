@@ -2,7 +2,7 @@
   "name": "silkpurse",
   "productName": "Silkpurse",
   "repository": "git@github.com:cmoid/silkpurse.git",
-  "version": "3.18.1",
+  "version": "0.1.0",
   "description": "A decentralized messaging and sharing app built on top of Secure Scuttlebutt (SSB).",
   "main": "index.js",
   "scripts": {

@@ -1,0 +1,5 @@
+unset ERLBUTT_SECRET
+unset ERLBUTT_ADDR
+unset ERLBUTT_SHS
+unset ssb_appname
+npm start

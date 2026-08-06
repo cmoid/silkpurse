@@ -1,0 +1,5 @@
+export ERLBUTT_SECRET=~/.ssb-keys/earlbutt/secret
+export ERLBUTT_ADDR=pub.cmoid.org:8008
+export ERLBUTT_SHS=1KHLiKZvAvjbY1ziZEHMXawbCEIM6qwjCDm3VYRan/s=
+export ssb_appname=silkpurse-earlbutt
+npm start

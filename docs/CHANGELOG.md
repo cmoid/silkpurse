@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+Add entries under an `## [Unreleased]` heading as you go. `npm run changelog`
+stamps that heading with the current version and today's date at release
+time, and `npm run release-notes` turns the stamped section into the text
+for the GitHub release. Copy this skeleton out of the comment when you
+start a new cycle -- the stamper deliberately ignores the commented copy.
+
 <!--
 ## [Unreleased]
 ### Added
@@ -13,6 +19,58 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 ### Security
 -->
+
+## v0.1.0 - 2026-08-23
+
+The first Silkpurse release. Patchwork's final release was v3.18.1; this
+is a fork of it, and the version numbering starts over.
+
+### Added
+- SQLite full-text search, ported from PonchoWonky.
+- erlbutt remote mode: Silkpurse can act as a front end for an
+  [erlbutt](https://github.com/cmoid/erlbutt) node instead of running its
+  own embedded server, including blob serving and search indexing over
+  muxrpc. Enabled by pointing `ERLBUTT_SECRET` at an erlbutt identity, or
+  by an `erlbutt` block in `~/.silkpurse/config`.
+- Startup failures are reported in a dialog. A packaged app launched from
+  Finder has no terminal, so a fatal error used to mean the icon bounced
+  once and vanished with no explanation.
+
+### Changed
+- Rebranded from Patchwork to Silkpurse.
+- **Data now lives in `~/.silkpurse/`, not `~/.ssb/`.** An existing
+  Patchwork or ssb-server install is left untouched; Silkpurse starts as
+  a new identity in its own directory.
+- Electron 11 to Electron 39, and `electron.remote` to `@electron/remote`.
+- depject, depnest and patch-settings replaced with a plain wiring layer.
+- macOS builds are Apple silicon only, and are ad-hoc signed.
+
+### Removed
+- Tags and gatherings.
+- git-ssb integration.
+- Blog rendering (scuttle-blog).
+- DHT invite support (ssb-dht-invite).
+- The old ssb-search plugin and search page, superseded by SQLite search.
+- Upstream Patchwork's release banner.
+
+### Fixed
+- Long-lived streams are re-subscribed after a reconnect. A single
+  dropped connection used to leave every open tab dead and the interface
+  stuck on "Scuttling..." indefinitely.
+- LAN peer discovery restored, with a macOS-safe broadcast socket.
+- Compose drafts are scoped to the logged-in identity.
+- Private attachments render again -- the blob shim honours `?unbox=`.
+- Search and bulk indexing no longer starve the event loop.
+
+## Patchwork changelog
+
+What follows is upstream Patchwork's own changelog, kept for the history
+it records. It describes a different program; nothing below this heading
+applies to Silkpurse.
+
+(The heading level matters: `scripts/release-notes.js` stops collecting a
+release's notes at the next `## ` heading, so a `# ` divider here would
+be swallowed into the generated release notes.)
 
 ## v3.18.1 - 2021-04-05
 

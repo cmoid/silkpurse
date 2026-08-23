@@ -1,11 +1,17 @@
 const fs = require('fs')
 const path = require('path')
 
-const version = process.env.npm_package_version
-
-if (version == null) {
-  throw new Error('no version found, are you running from npm? try `npm run release-notes`')
-}
+// npm sets npm_package_version when run as `npm run release-notes`, but
+// requiring it forced this script through npm -- and npm >= 7 writes its
+// run-script banner ("> silkpurse@0.1.0 release-notes") to STDOUT, so a
+// plain redirect captured it into the release notes. That banner reached
+// a published release once. Reading package.json directly means
+//
+//     node scripts/release-notes.js > notes.md
+//
+// works with nothing to remember.
+const pkg = require(path.join(__dirname, '..', 'package.json'))
+const version = process.env.npm_package_version || pkg.version
 
 const template = fs.readFileSync(path.join(__dirname, '..', 'docs', 'release-notes-template.md'), 'utf8')
 const changelog = fs.readFileSync(path.join(__dirname, '..', 'docs', 'CHANGELOG.md'), 'utf8')

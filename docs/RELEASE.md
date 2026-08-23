@@ -43,8 +43,14 @@ commit and creates a tag, which the rest of these steps do by hand.)
 **4. Generate the release notes:**
 
 ```shell
-npm run release-notes > /tmp/silkpurse-notes.md
+node scripts/release-notes.js > /tmp/silkpurse-notes.md
 ```
+
+Invoke it directly, not through `npm run`: npm >= 7 writes its
+run-script banner to **stdout**, so `npm run release-notes > file`
+captures two `>` lines into the top of the notes, where Markdown renders
+them as a stray blockquote. (`npm run --silent release-notes` also
+suppresses it, if you prefer npm.)
 
 `scripts/release-notes.js` takes everything under the `## v<version>`
 heading you just stamped and substitutes it into

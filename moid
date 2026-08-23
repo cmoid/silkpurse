@@ -1,5 +1,5 @@
 unset ERLBUTT_SECRET
 unset ERLBUTT_ADDR
 unset ERLBUTT_SHS
-unset ssb_appname
+export ssb_appname=silkpurse-moid
 npm start

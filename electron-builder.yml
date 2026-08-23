@@ -8,6 +8,40 @@ appId: org.cmoid.silkpurse
 # from a URL that no longer exists.
 npmRebuild: false
 
+# Without this, the stray working files in the project root (the `moid` and
+# `earlbutt` run scripts, dial.js/peers.js, editor backups) are packed into
+# the asar, because there is no default `files` filter.
+files:
+  - "**/*"
+  - "!**/*~"
+  - "!dial.js"
+  - "!peers.js"
+  - "!moid"
+  - "!earlbutt"
+  - "!docs${/*}"
+  - "!scripts${/*}"
+
+mac:
+  category: public.app-category.social-networking
+  # Apple silicon only, and this is forced rather than chosen: leveldown
+  # publishes no darwin-arm64 prebuild, so node_modules/leveldown/build/
+  # Release/leveldown.node is compiled locally at install time (arm64
+  # here).  node-gyp-build prefers build/Release over prebuilds/, so an
+  # x64 package built from this same tree would ship the arm64 binary and
+  # die on launch on an Intel Mac.  Shipping both architectures needs two
+  # separate `npm install` trees, not one build.
+  target:
+    - target: dmg
+      arch:
+        - arm64
+    - target: zip
+      arch:
+        - arm64
+  # Ad-hoc signing.  See scripts/adhoc-sign.js for why an unsigned build
+  # is NOT the same as an ad-hoc signed one, and why `identity: null` must
+  # not be added here.
+  sign: ./scripts/adhoc-sign.js
+
 linux:
   category: Network
   target:

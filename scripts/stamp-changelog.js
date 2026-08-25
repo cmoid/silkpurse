@@ -13,7 +13,7 @@
 //
 // It reads the version from ./package.json, so run this from the repo root.
 
-const path = require("path");
-const changelogVersion = require("changelog-version");
+const path = require('path')
+const changelogVersion = require('changelog-version')
 
-changelogVersion(path.join(__dirname, "..", "docs", "CHANGELOG.md"));
+changelogVersion(path.join(__dirname, '..', 'docs', 'CHANGELOG.md'))

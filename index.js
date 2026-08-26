@@ -49,10 +49,7 @@ function quitIfAlreadyRunning() {
 quitIfAlreadyRunning();
 
 electron.app.on("ready", () => {
-  setupContext(process.env.ssb_appname || "silkpurse", {
-    server: !(process.argv.includes("-g") ||
-      process.argv.includes("--use-global-ssb")),
-  }, () => {
+  setupContext(process.env.ssb_appname || "silkpurse", () => {
     const browserWindow = openMainWindow();
     require("@electron/remote/main").enable(browserWindow.webContents)
 
@@ -295,54 +292,24 @@ function fatal(message) {
   return electron.app.quit();
 }
 
-function setupContext(appName, opts, cb) {
-  ssbConfig = require("ssb-config/inject")(
-    appName,
-    extend({
-      port: 8087,
-      blobsPort: 8989, // matches ssb-ws
-      friends: { // not using ssb-friends (sbot/contacts fixes hops at 2, so this setting won't do anything)
-        dunbar: 150,
-        hops: 2, // down from 3
-      },
-    }, opts),
-  );
+function setupContext(appName, cb) {
+  ssbConfig = require("ssb-config/inject")(appName, {
+    blobsPort: 8989, // matches the blob shim
+  });
 
-  // disable gossip auto-population from {type: 'pub'} messages as we handle this manually in sbot/index.js
-  if (!ssbConfig.gossip) ssbConfig.gossip = {};
-  ssbConfig.gossip.autoPopulate = false;
-
+  // The local secret is still read (and created on first run) because
+  // ssb-config's own defaults expect one, but it is NOT the identity this
+  // app uses — erlbutt's is, loaded below.  Listener, unix socket, room
+  // and gossip settings are all gone with the embedded server: nothing
+  // here accepts connections any more, it only makes one.
   ssbConfig.keys = ssbKeys.loadOrCreateSync(
     Path.join(ssbConfig.path, "secret"),
   );
 
-  const keys = ssbConfig.keys;
-  const pubkey = keys.id.slice(1).replace(`.${keys.curve}`, "");
-
-  if (process.platform === "win32") {
-    // fix offline on windows by specifying 127.0.0.1 instead of localhost (default)
-    ssbConfig.remote = `net:127.0.0.1:${ssbConfig.port}~shs:${pubkey}`;
-  } else {
-    const socketPath = Path.join(ssbConfig.path, "socket");
-    ssbConfig.connections.incoming.unix = [{
-      scope: "device",
-      transform: "noauth",
-    }];
-    ssbConfig.remote = `unix:${socketPath}:~noauth:${pubkey}`;
-  }
-
-  // Support rooms
-  ssbConfig.connections.incoming.tunnel = [{
-    scope: "public",
-    transform: "shs",
-  }];
-  ssbConfig.connections.outgoing.tunnel = [{ transform: "shs" }];
-
-  // erlbutt remote mode (Model A): instead of spawning an embedded
-  // ssb-server, become erlbutt's face — authenticate as erlbutt's own
-  // identity and talk muxrpc to it.  Settings come from the environment
-  // or from an "erlbutt" block in ~/.silkpurse/config (see
-  // lib/erlbutt-config.js); no settings at all means local mode.
+  // erlbutt is the only backend: this app is erlbutt's face, authenticating
+  // as erlbutt's own identity and talking muxrpc to it.  Settings come from
+  // the environment or from an "erlbutt" block in ~/.silkpurse/config (see
+  // lib/erlbutt-config.js).
   //
   // The resolved block is stored on ssbConfig, so the background window
   // (server-process.js) sees the same decision — it is handed the config,
@@ -353,51 +320,50 @@ function setupContext(appName, opts, cb) {
   } catch (err) {
     return fatal(err.message);
   }
-  ssbConfig.erlbutt = erlbutt || undefined;
 
-  if (erlbutt) {
-    opts.server = false;
-    ssbConfig.keys = ssbKeys.loadSync(erlbutt.secret);
-    const ek = ssbConfig.keys;
-    const epub = ek.id.slice(1).replace(`.${ek.curve}`, "");
-    ssbConfig.remote = `net:${erlbutt.addr}~shs:${epub}`;
-    if (erlbutt.shs) {
-      ssbConfig.caps = extend(ssbConfig.caps, { shs: erlbutt.shs });
-    }
-    console.log(`[erlbutt] remote mode (from ${erlbutt.source}):`,
-                ssbConfig.remote, "caps.shs:", ssbConfig.caps.shs);
-  } else {
-    // Say so out loud: a packaged app that quietly fell back to the
-    // embedded server would look like erlbutt "losing" all your data.
-    console.log("[erlbutt] local mode — embedded server at", ssbConfig.path);
+  if (!erlbutt) {
+    // There is no embedded server to fall back to, so say what is needed
+    // rather than starting into a state that cannot work.  A packaged app
+    // has no terminal, which is why this is a dialog and not a log line.
+    return fatal(
+      "Silkpurse needs an erlbutt backend, and none is configured.\n\n" +
+        "Set these in the environment, or as an \"erlbutt\" block in " +
+        "~/.silkpurse/config:\n\n" +
+        "  ERLBUTT_SECRET  path to erlbutt's secret (ssb-keys JSON)\n" +
+        "  ERLBUTT_ADDR    host:port of its listener " +
+        "(default 127.0.0.1:8008)\n" +
+        "  ERLBUTT_SHS     its network id / caps.shs, if not the default\n\n" +
+        "An app launched from Finder inherits no shell environment, so a " +
+        "packaged build needs the config file.",
+    );
   }
+
+  ssbConfig.erlbutt = erlbutt;
+  ssbConfig.keys = ssbKeys.loadSync(erlbutt.secret);
+  const ek = ssbConfig.keys;
+  const epub = ek.id.slice(1).replace(`.${ek.curve}`, "");
+  ssbConfig.remote = `net:${erlbutt.addr}~shs:${epub}`;
+  if (erlbutt.shs) {
+    ssbConfig.caps = extend(ssbConfig.caps, { shs: erlbutt.shs });
+  }
+  console.log(`[erlbutt] backend (from ${erlbutt.source}):`,
+              ssbConfig.remote, "caps.shs:", ssbConfig.caps.shs);
 
   const redactedConfig = JSON.parse(JSON.stringify(ssbConfig));
   redactedConfig.keys.private = null;
   console.dir(redactedConfig, { depth: null });
 
-  if (erlbutt) {
-    // erlbutt mode: no embedded server.  Start the blob HTTP shim (the
-    // renderer's blob URLs need a localhost endpoint, normally provided
-    // by the embedded server's ssb-ws), then open the hidden window —
-    // server-process.js runs only the search indexer in this mode, fed
-    // from erlbutt over muxrpc.
-    require("./lib/erlbutt-shim")(ssbConfig, (err) => {
-      if (err) {
-        console.log("[erlbutt] blob shim failed to start:", err.message);
-      }
-      spawnBackgroundWindow();
-      cb && cb();
-    });
-  } else if (opts.server === false) {
-    cb && cb();
-  } else {
-    electron.ipcMain.once("server-started", function (ev, config) {
-      ssbConfig = config;
-      cb && cb();
-    });
+  // Start the blob HTTP shim — the renderer's blob URLs need a localhost
+  // endpoint, which used to come from the embedded server's ssb-ws — then
+  // open the hidden window, where server-process.js runs the search
+  // indexer fed from erlbutt over muxrpc.
+  require("./lib/erlbutt-shim")(ssbConfig, (err) => {
+    if (err) {
+      console.log("[erlbutt] blob shim failed to start:", err.message);
+    }
     spawnBackgroundWindow();
-  }
+    cb && cb();
+  });
 
   function spawnBackgroundWindow() {
     windows.background = openWindow(

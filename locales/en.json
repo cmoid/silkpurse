@@ -393,5 +393,21 @@
 	"Listen": "Listen",
 	"Ignore": "Ignore",
 	"Update Gathering": "Update Gathering",
-	"Search": "Search"
+	"Search": "Search",
+	"Earlier history archived": "Earlier history archived",
+	"%s messages": "%s messages",
+	"Fetch earlier history": "Fetch earlier history",
+	"Fetching…": "Fetching…",
+	"Nothing was skipped — you already have this history.": "Nothing was skipped — you already have this history.",
+	"Downloading the archive… ask again once it lands.": "Downloading the archive… ask again once it lands.",
+	"Earlier history restored and verified.": "Earlier history restored and verified.",
+	"Earlier history restored and verified. Reload to see it.": "Earlier history restored and verified. Reload to see it.",
+	"Verification failed: ": "Verification failed: ",
+	"Could not fetch: ": "Could not fetch: ",
+	"No response": "No response",
+	"Downloading the archive…": "Downloading the archive…",
+	"Verifying earlier history…": "Verifying earlier history…",
+	"Still downloading — try again later.": "Still downloading — try again later.",
+	"The archive could not be read.": "The archive could not be read.",
+	"unknown": "unknown"
 }

@@ -6,10 +6,20 @@ does not exist here — ignore it.)
 
 ## What gets built
 
-One platform, one architecture: **macOS, Apple silicon**. See
-[INSTALL.md](INSTALL.md#what-the-releases-contain) for why Intel is not
-included. The Linux and Windows blocks in `electron-builder.yml` are
-inherited from Patchwork and are neither built nor tested.
+One platform, two architectures: **macOS, Apple silicon and Intel** — a
+dmg and a zip each, four artifacts. Both come out of one `npm run dist`
+and one `node_modules`; see
+[INSTALL.md](INSTALL.md#what-the-releases-contain) for why that was not
+always true.
+
+Intel is the lesser-tested of the two. It can be exercised under Rosetta
+on an Apple silicon machine — enough to prove the binary is x86_64 and
+that the native crypto loads — but nobody here has run it on real Intel
+hardware. Treat a bug report against it as plausible rather than
+surprising.
+
+The Linux and Windows blocks in `electron-builder.yml` are inherited from
+Patchwork and are neither built nor tested.
 
 ## Steps
 
@@ -75,7 +85,14 @@ Watch for these two lines in the output — they are the ones that matter:
 ```
 • executing custom sign  file=dist/mac-arm64/Silkpurse.app ...
 • ad-hoc signature verified
+• executing custom sign  file=dist/mac/Silkpurse.app ...
+• ad-hoc signature verified
 ```
+
+Twice — once per architecture. `dist/mac-arm64/` is Apple silicon and
+`dist/mac/` is Intel, which is electron-builder's naming and not a
+mistake: x64 is its default arch, so only the *other* one gets a
+suffixed directory.
 
 If signing were skipped instead, the build would still "succeed" and
 produce an app that macOS refuses to open at all. See
@@ -110,6 +127,11 @@ Security. If you instead get **"Silkpurse is damaged and can't be
 opened"**, the signature is broken — stop and fix it, because that
 message offers the user no way through.
 
+Do this for the x64 zip as well. On an Apple silicon machine that copy
+runs under Rosetta, and macOS may add a notice about support for
+Intel-based apps ending — that is Rosetta talking, not a fault in the
+build, and someone on actual Intel hardware never sees it.
+
 **8. Tag and push.** 
 
 ```shell
@@ -127,6 +149,8 @@ much worse problem — pick a new version instead.
 gh release create v0.1.0 \
   dist/Silkpurse-0.1.0-arm64.dmg \
   dist/Silkpurse-0.1.0-arm64-mac.zip \
+  dist/Silkpurse-0.1.0-x64.dmg \
+  dist/Silkpurse-0.1.0-x64-mac.zip \
   --title "Silkpurse 0.1.0" \
   --notes-file /tmp/silkpurse-notes.md
 ```

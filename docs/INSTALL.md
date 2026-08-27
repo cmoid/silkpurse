@@ -2,25 +2,38 @@
 
 ## What the releases contain
 
-Releases are published on the [GitHub releases page][releases] as two
-equivalent artifacts — take whichever you prefer:
+Releases are published on the [GitHub releases page][releases]. There are
+four, covering two architectures in two equivalent formats:
 
 | File | Notes |
 |---|---|
-| `Silkpurse-<version>-arm64.dmg` | Disk image. Open it and drag Silkpurse to Applications. |
-| `Silkpurse-<version>-arm64-mac.zip` | Zip of the same `.app`. |
+| `Silkpurse-<version>-arm64.dmg` | Apple silicon. Open it and drag Silkpurse to Applications. |
+| `Silkpurse-<version>-arm64-mac.zip` | Apple silicon, same `.app` in a zip. |
+| `Silkpurse-<version>-x64.dmg` | Intel. |
+| `Silkpurse-<version>-x64-mac.zip` | Intel, same `.app` in a zip. |
 
-**macOS on Apple silicon only** — for now, and no longer for a technical
-reason. Removing the embedded server took `leveldown` with it, and that
-was the dependency that had to be compiled at install time because it
-published no Apple silicon binary; a package built here would carry that
-arm64 binary into an Intel build and crash on launch.
+If you are unsure which you need:  → **About This Mac**. "Apple M1"
+or later means `arm64`; "Intel Core" means `x64`.
 
-Nothing compiles at install time any more, and the one native dependency
-left (`sodium-native`) ships prebuilt binaries for both architectures. So
-an Intel build should now be a matter of building and testing one rather
-than of working around anything. It has not been done, so it is not
-offered — but if you need it, building from source is worth trying.
+Intel took a while to arrive, and the reason is worth stating because it
+was not a decision. Silkpurse used to embed an ssb-server, and one of its
+dependencies (`leveldown`) published no Apple silicon binary, so it was
+compiled during install; `node-gyp-build` prefers a locally compiled
+binary over a shipped one, which meant an Intel package built on an Apple
+silicon machine carried the arm64 binary inside it and died on launch.
+Two architectures needed two separate machines.
+
+Removing the embedded server removed `leveldown`. Nothing compiles at
+install time now and every remaining native dependency ships prebuilt
+binaries for both, so one checkout builds both.
+
+**The Intel build is the less-tested of the two.** It is verified under
+Rosetta on an Apple silicon machine — the binary is `x86_64`, the
+`darwin-x64` prebuilds are the ones unpacked, and the crypto stack loads
+and signs correctly as x64 — but it has not been run on real Intel
+hardware. It should be fine. It has simply had less use than the arm64
+build, and is worth reporting bugs against rather than assuming they are
+your own setup.
 
 Linux and Windows targets are configured but unbuilt and untested. Treat
 them as source-only for now.

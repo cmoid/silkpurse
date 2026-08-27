@@ -5,17 +5,22 @@ Silkpurse is a desktop client for [Secure Scuttlebutt][ssb], forked from
 
 ## Download
 
-**macOS on Apple silicon only.** Either artifact works; they contain the
-same app.
+**macOS, Apple silicon and Intel.** The dmg and the zip hold the same
+app; take whichever you prefer.
+
+Apple silicon (**About This Mac** says "Apple M1" or later):
 
 - `Silkpurse-$$VERSION-arm64.dmg`
 - `Silkpurse-$$VERSION-arm64-mac.zip`
 
-There is no Intel build offered, though the technical reason for that is
-gone: nothing compiles at install time any more and the one remaining
-native dependency ships binaries for both architectures. It simply has
-not been built and tested. [Building from source][install] is worth a try
-if you need it.
+Intel (**About This Mac** says "Intel Core"):
+
+- `Silkpurse-$$VERSION-x64.dmg`
+- `Silkpurse-$$VERSION-x64-mac.zip`
+
+The Intel build is the less-tested of the two — verified under Rosetta on
+an Apple silicon machine, but not run on real Intel hardware. Please
+report anything odd rather than assuming it is your setup.
 
 ## First launch — please read this
 
@@ -90,7 +95,6 @@ reason:
 
 ## Known limitations
 
-- Apple silicon only — see Download.
 - Requires a running erlbutt node; there is no standalone mode.
 - macOS shows the unidentified-developer warning on first launch, as
   above.

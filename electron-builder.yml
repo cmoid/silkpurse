@@ -28,20 +28,38 @@ files:
 
 mac:
   category: public.app-category.social-networking
-  # Apple silicon only, and this is forced rather than chosen: leveldown
-  # publishes no darwin-arm64 prebuild, so node_modules/leveldown/build/
-  # Release/leveldown.node is compiled locally at install time (arm64
-  # here).  node-gyp-build prefers build/Release over prebuilds/, so an
-  # x64 package built from this same tree would ship the arm64 binary and
-  # die on launch on an Intel Mac.  Shipping both architectures needs two
-  # separate `npm install` trees, not one build.
+  # Both architectures, which was NOT possible before the embedded server
+  # went away.  leveldown published no darwin-arm64 prebuild, so it was
+  # compiled at install time, and node-gyp-build prefers build/Release
+  # over prebuilds/ — an x64 package built from this tree shipped the
+  # arm64 binary and died on launch.  Two architectures needed two
+  # separate npm install trees.
+  #
+  # Dropping the server took leveldown with it.  Nothing compiles at
+  # install time now, and every remaining native dep is prebuild-based
+  # with a darwin-x64 to offer, so one tree builds both.
+  #
+  # Caveat on x64: it is verified only under Rosetta on Apple silicon
+  # (correct binary arch, right prebuilds unpacked, crypto stack loads
+  # and signs as x64), never on real Intel hardware.
   target:
     - target: dmg
       arch:
         - arm64
+        - x64
     - target: zip
       arch:
         - arm64
+        - x64
+  # x64 is electron-builder's default arch, and a default arch has its
+  # suffix STRIPPED — so the Intel artifacts came out as bare
+  # `Silkpurse-<version>.dmg` next to an explicit `-arm64.dmg`, which on a
+  # release page reads as "the normal one" rather than "the Intel one".
+  # Naming the pattern explicitly is what stops the stripping (it sets
+  # isUserForced); these two patterns are the defaults with that one
+  # behaviour removed, so the arm64 names are unchanged.
+  artifactName: ${productName}-${version}-${arch}-mac.${ext}
+
   # Ad-hoc signing.  See scripts/adhoc-sign.js for why an unsigned build
   # is NOT the same as an ad-hoc signed one, and why `identity: null` must
   # not be added here.
@@ -74,6 +92,7 @@ snap:
 
 dmg:
   icon: build/dmg/icon.icns
+  artifactName: ${productName}-${version}-${arch}.${ext}
 
 win:
   target:

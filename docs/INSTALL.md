@@ -10,13 +10,17 @@ equivalent artifacts — take whichever you prefer:
 | `Silkpurse-<version>-arm64.dmg` | Disk image. Open it and drag Silkpurse to Applications. |
 | `Silkpurse-<version>-arm64-mac.zip` | Zip of the same `.app`. |
 
-**macOS on Apple silicon only.** There is no Intel build, and that is a
-technical limitation rather than a decision: one of Silkpurse's native
-dependencies (`leveldown`) publishes no prebuilt Apple silicon binary, so
-it is compiled during install, and a package built on an Apple silicon
-machine would carry that arm64 binary into an Intel build and crash on
-launch. Supporting Intel means a separate build on an Intel machine. If
-you need it, build from source — see below.
+**macOS on Apple silicon only** — for now, and no longer for a technical
+reason. Removing the embedded server took `leveldown` with it, and that
+was the dependency that had to be compiled at install time because it
+published no Apple silicon binary; a package built here would carry that
+arm64 binary into an Intel build and crash on launch.
+
+Nothing compiles at install time any more, and the one native dependency
+left (`sodium-native`) ships prebuilt binaries for both architectures. So
+an Intel build should now be a matter of building and testing one rather
+than of working around anything. It has not been done, so it is not
+offered — but if you need it, building from source is worth trying.
 
 Linux and Windows targets are configured but unbuilt and untested. Treat
 them as source-only for now.
@@ -49,23 +53,40 @@ If you ever see **"Silkpurse is damaged and can't be opened"** instead of
 the message above, that is a different problem — the download is
 corrupt or incomplete. Download it again rather than working around it.
 
-## Where Silkpurse keeps its data
+## Silkpurse needs erlbutt
 
-By default, everything lives in **`~/.silkpurse/`**:
+Silkpurse has no database of its own. It is a client: an
+[erlbutt][erlbutt] node holds the messages, does the replicating, and owns
+the identity you post as. Silkpurse connects to it over the network and
+renders what it finds.
+
+That erlbutt can be on this machine or another one — the same build talks
+to either, and switching between them is a matter of pointing it
+somewhere else.
+
+**So there is nothing to install until you have an erlbutt node running**,
+and nothing useful happens without one: Silkpurse will tell you what it
+needs and quit. See erlbutt's own documentation for setting one up, and
+`doc/ops/ssb-conversion.md` there if you are moving an existing feed
+across from a JavaScript client.
+
+### What it does keep locally
+
+A directory of its own — `~/.silkpurse/` unless `ssb_appname` says
+otherwise — holding two things:
 
 | Path | Contents |
 |---|---|
-| `~/.silkpurse/secret` | Your identity keypair. **This is the thing to back up.** Lose it and the feed cannot be continued by anyone, including you. |
-| `~/.silkpurse/flume/` | The message database and its indexes. |
-| `~/.silkpurse/blobs/` | Images and file attachments. |
-| `~/.silkpurse/full-text-search.<id>.sqlite` | Search index. Disposable — deleting it costs a re-index, nothing more. |
-| `~/.silkpurse/conn.json` | Known peers. |
-| `~/.silkpurse/config` | Optional settings file, see below. |
+| `full-text-search.<id>.sqlite` | The search index, built from erlbutt over muxrpc. Disposable: deleting it costs a rebuild and nothing else. |
+| `secret` | Created on first run and **never used**. Silkpurse authenticates as erlbutt's identity, not this one. It exists because the config library expects a keypair to be there. |
 
-**Silkpurse does not read or write `~/.ssb`.** If you have an existing
-Patchwork or ssb-server install, it is untouched unless you deliberately
-point Silkpurse at it — see [Sharing a directory with another
-client](#sharing-a-directory-with-another-client).
+Nothing else. Your messages, blobs, follows and identity all live in
+erlbutt, so a Silkpurse install is disposable — losing it costs you a
+search index.
+
+The search index is named after the identity it indexed, so pointing the
+same install at two different erlbutt nodes keeps two indexes rather than
+mixing them.
 
 ## Settings
 
@@ -84,28 +105,26 @@ Sources, **later ones winning**:
 So any `ssb-config` key can be set either way. These are equivalent:
 
 ```shell
-silkpurse_port=9001 open -a Silkpurse
+silkpurse_blobsPort=9001 open -a Silkpurse
 ```
 
 ```json
-{ "port": 9001 }
+{ "blobsPort": 9001 }
 ```
+
+Most `ssb-config` keys are inert here — they configure a server, and
+Silkpurse does not run one. The ones that matter are the `ERLBUTT_*`
+settings below, which say which node to talk to.
 
 ### Environment variables
 
 | Variable | Default | Effect |
 |---|---|---|
 | `ssb_appname` | `silkpurse` | Sets the app name, and so the data directory (`~/.<appname>`), the settings file (`~/.<appname>/config`) and the env prefix (`<appname>_`). |
-| `silkpurse_*` | — | Any `ssb-config` key, e.g. `silkpurse_port`. The prefix follows `ssb_appname`. |
-| `ERLBUTT_SECRET` | unset | Path to an erlbutt identity's `secret`. **Setting this switches Silkpurse into erlbutt remote mode.** |
-| `ERLBUTT_ADDR` | `127.0.0.1:8008` | `host:port` of the erlbutt node. Only consulted in remote mode. |
-| `ERLBUTT_SHS` | unset | Base64 network key, if the erlbutt node runs on a non-default network. |
-
-And one command-line flag:
-
-| Flag | Effect |
-|---|---|
-| `-g`, `--use-global-ssb` | Do not start the embedded server; connect to an already-running one instead. Only meaningful together with `ssb_appname` — on its own it looks for a server in `~/.silkpurse` that nothing is running. |
+| `silkpurse_*` | — | Any `ssb-config` key, e.g. `silkpurse_blobsPort`. The prefix follows `ssb_appname`. |
+| `ERLBUTT_SECRET` | unset | **Required.** Path to the erlbutt node's `secret` — the identity Silkpurse authenticates and posts as. Without it Silkpurse says so and quits. |
+| `ERLBUTT_ADDR` | `127.0.0.1:8008` | `host:port` of the erlbutt node. |
+| `ERLBUTT_SHS` | unset | Base64 network key, if the node is not on the default network. Get this wrong and the handshake fails against a node that is otherwise fine. |
 
 ### Environment variables and the packaged app
 
@@ -136,64 +155,41 @@ ERLBUTT_ADDR=pub.example.org:8008 \
   /Applications/Silkpurse.app/Contents/MacOS/Silkpurse
 ```
 
-## erlbutt remote mode
+## Connecting to erlbutt
 
-Instead of running its own embedded SSB server, Silkpurse can act as a
-front end for an [erlbutt][erlbutt] node, authenticating as that node's
-own identity.
+Silkpurse authenticates as the erlbutt node's own identity — it *is* that
+node's face, not a separate peer talking to it. So the secret it needs is
+erlbutt's, and anything you post is published to erlbutt's feed.
 
-Three things are worth knowing before you try it:
+Two things are worth knowing:
 
-- **The secret is what turns remote mode on, not the address.** Setting
-  only `ERLBUTT_ADDR` does nothing at all — you stay in local mode, which
-  looks very much like erlbutt mode failing to connect. If the log does
-  not say `[erlbutt] remote mode`, you are not in it.
+- **A missing or mistyped secret is fatal, and says so.** It will not
+  quietly mint a new identity at the path you typed, which would look
+  like erlbutt having lost everything.
 
-- **Remote mode never falls back to the embedded server.** Once a secret
-  is set, the embedded server is not started, whatever the address points
-  at. `ERLBUTT_ADDR=127.0.0.1:...` means "connect to whatever is
-  listening there", not "use the local embedded server" — the two are
-  separate things and the embedded server is not reachable that way.
+- **The network key has to match.** `ERLBUTT_SHS` defaults to the main
+  SSB network. A node on a different one — erlbutt's development network,
+  say — will complete no handshake at all, and the failure looks like the
+  node being down rather than being on another network.
 
-- **Your local database is not touched in remote mode.** No embedded
-  server is constructed, so nothing opens `flume`. The only thing written
-  under the data directory is the search index, which is named after the
-  identity being indexed, so a remote identity and a local one can
-  coexist in one directory without corrupting each other's index.
+Since the identity is erlbutt's, two people pointing their own Silkpurse
+at the same node are the same author. That is a reasonable thing to do
+deliberately and a surprising thing to discover by accident.
 
-A missing secret file is treated as fatal and reported in a dialog,
-rather than silently creating a new identity at the typo'd path.
+## Pointing it at a different erlbutt
 
-## Sharing a directory with another client
-
-You can point Silkpurse at another client's directory, most obviously the
-`~/.ssb` used by Patchwork and ssb-server. **Back up the directory
-first** — in particular `~/.ssb/secret`.
-
-There are two quite different versions of this:
-
-**Connecting to a server you are already running** — comparatively safe.
-Silkpurse starts no server of its own and just talks to yours:
+The same install can front more than one node — your own on this machine,
+a pub you run elsewhere. Give each a distinct `ssb_appname` so their
+search indexes stay separate:
 
 ```shell
-ssb_appname=ssb /Applications/Silkpurse.app/Contents/MacOS/Silkpurse -g
+ssb_appname=silkpurse-home    ERLBUTT_ADDR=127.0.0.1:8008 ...
+ssb_appname=silkpurse-pub     ERLBUTT_ADDR=pub.example.org:8008 ...
 ```
 
-**Opening the directory directly** — riskier. Silkpurse starts its *own*
-embedded server against that database, with its own set of plugins, which
-can rewrite indexes in ways the other client did not expect:
-
-```shell
-ssb_appname=ssb /Applications/Silkpurse.app/Contents/MacOS/Silkpurse
-```
-
-Your messages are not at risk — an SSB log is append-only and your
-identity lives in `secret` — but indexes may be rebuilt, the other client
-may then want to rebuild them again, and the round trip can take a long
-time on a large database.
-
-If you have no specific reason to share a directory, **don't**. Let
-Silkpurse use its own `~/.silkpurse` and treat it as a fresh install.
+Each gets its own `~/.silkpurse-<name>/`. Since the identity comes from
+`ERLBUTT_SECRET`, you post as whoever that node is — which is worth
+keeping straight when one of them is a pub.
 
 ## Building from source
 

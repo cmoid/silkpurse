@@ -56,7 +56,7 @@ suppresses it, if you prefer npm.)
 heading you just stamped and substitutes it into
 `docs/release-notes-template.md` at `$$CHANGES`, with `$$VERSION` filled
 in throughout. The template holds the parts every release restates — how
-to get past the first-launch warning, the `~/.ssb` guidance, the
+to get past the first-launch warning, the erlbutt requirement, the
 configuration table — so the changelog only has to carry what actually
 changed.
 
@@ -178,7 +178,7 @@ Three pieces, and the split between them is the point:
 | File | Holds |
 |---|---|
 | `docs/CHANGELOG.md` | The accumulating record. Hand-written, one section per release. |
-| `docs/release-notes-template.md` | The parts every release restates — download, first launch, `~/.ssb`, configuration. |
+| `docs/release-notes-template.md` | The parts every release restates — download, first launch, the erlbutt requirement, configuration. |
 | `scripts/release-notes.js` | Joins them: pulls one release's section out of the changelog into the template's `$$CHANGES`. |
 
 Nothing here reads git history. `changelog-version` — the tool behind

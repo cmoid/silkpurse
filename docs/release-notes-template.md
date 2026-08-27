@@ -11,11 +11,11 @@ same app.
 - `Silkpurse-$$VERSION-arm64.dmg`
 - `Silkpurse-$$VERSION-arm64-mac.zip`
 
-There is no Intel build. One of the native dependencies has no prebuilt
-Apple silicon binary and is compiled at install time, so a package built
-here would carry an arm64 binary into an Intel build and crash on launch.
-Intel needs a separate build — please [build from source][install] if you
-need it.
+There is no Intel build offered, though the technical reason for that is
+gone: nothing compiles at install time any more and the one remaining
+native dependency ships binaries for both architectures. It simply has
+not been built and tested. [Building from source][install] is worth a try
+if you need it.
 
 ## First launch — please read this
 
@@ -41,54 +41,57 @@ This happens because Silkpurse is not signed with a paid Apple Developer
 certificate, so macOS cannot tell you who built it. Patchwork was
 distributed the same way.
 
-## Your data, and your existing `~/.ssb`
+## Silkpurse needs an erlbutt node
 
-Silkpurse stores everything in **`~/.silkpurse/`** and **does not read or
-write `~/.ssb`**. If you already run Patchwork or ssb-server, installing
-Silkpurse leaves that install alone — Silkpurse starts as a new identity
-in its own directory.
+This release has no database of its own. Silkpurse is a client:
+[erlbutt][erlbutt] holds the messages, does the replicating, and owns the
+identity you post as. Point Silkpurse at one — on this machine or
+elsewhere — and it renders what it finds.
 
-You *can* point it at an existing `~/.ssb` with `ssb_appname=ssb`. If you
-do, **back that directory up first**, especially `~/.ssb/secret`. Your
-messages are not at risk — an SSB log is append-only — but Silkpurse will
-run its own embedded server against that database with its own plugins,
-which can rebuild indexes in ways your other client did not expect, and
-rebuilding a large database is slow in both directions.
+**Without one it will tell you what it needs and quit.** If you are
+upgrading from a release that ran its own server, that is the change: set
+up erlbutt first, and move your feed across with its
+`doc/ops/ssb-conversion.md` if you have an existing one.
 
-Unless you have a specific reason to share a directory, don't. Let
-Silkpurse use `~/.silkpurse` and treat it as a fresh install.
-
-Once you are set up, **back up `~/.silkpurse/secret`**. It is your
-identity; if it is lost, your feed cannot be continued by anyone,
-including you.
+What stays on this machine is a search index and an unused keypair, both
+disposable. Everything that matters lives in erlbutt, so back that up
+rather than this.
 
 ## What's new in $$VERSION
 $$CHANGES
 
 ## Configuration
 
-Full detail in [INSTALL.md][install]. The short version:
+Full detail in [INSTALL.md][install]. The short version: Silkpurse is a
+client, so the settings that matter are the ones naming the node it talks
+to.
 
 | Variable | Default | Effect |
 |---|---|---|
+| `ERLBUTT_SECRET` | unset | **Required.** Path to erlbutt's `secret` — the identity Silkpurse authenticates and posts as. Without it, it says so and quits. |
+| `ERLBUTT_ADDR` | `127.0.0.1:8008` | `host:port` of the erlbutt node. |
+| `ERLBUTT_SHS` | unset | Network key, if the node is not on the default network. |
 | `ssb_appname` | `silkpurse` | Data directory (`~/.<appname>`), settings file, and env prefix. |
-| `silkpurse_*` | — | Any `ssb-config` key, e.g. `silkpurse_port=9001`. |
-| `ERLBUTT_SECRET` | unset | Switches to [erlbutt][erlbutt] remote mode. |
-| `ERLBUTT_ADDR` | `127.0.0.1:8008` | erlbutt node address, remote mode only. |
-| `ERLBUTT_SHS` | unset | Network key, if not the default network. |
+| `silkpurse_*` | — | Any `ssb-config` key, e.g. `silkpurse_blobsPort=9001`. Most are inert — they configure a server, and there is not one here. |
 
 **An app launched from Finder inherits no shell environment.** Exporting
 variables in `.zshrc` will not affect a double-clicked Silkpurse — put
 settings in `~/.silkpurse/config` instead, which is read for exactly this
-reason.
+reason:
 
-Setting `ERLBUTT_SECRET` is what enables erlbutt remote mode; setting
-only `ERLBUTT_ADDR` does nothing, and looks confusingly like remote mode
-failing to connect.
+```json
+{
+  "erlbutt": {
+    "secret": "/Users/you/erlbutt-ssb/.ssberl/secret",
+    "addr": "127.0.0.1:8008"
+  }
+}
+```
 
 ## Known limitations
 
-- Apple silicon only.
+- Apple silicon only — see Download.
+- Requires a running erlbutt node; there is no standalone mode.
 - macOS shows the unidentified-developer warning on first launch, as
   above.
 - No auto-update. New versions are downloaded from the releases page.

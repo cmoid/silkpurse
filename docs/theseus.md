@@ -25,6 +25,9 @@ from `./scripts/metrics.sh [ref]`:
 | packaging fixes (require-style et al) | db026ba1 | 12,798 (139) | 4,379 | 76 + 5 | 1,468 |
 | remove depject               | a7360a74 | 12,173 (142)    | 4,379  | 73 + 5  | 1,413     |
 | rename lib/depject → lib/ui  | 495e4edf | 12,173 (142)    | 4,379  | 73 + 5  | 1,413     |
+| erlbutt remote mode          | d42ba27f | 12,434 (143)    | 4,379  | 73 + 5  | 1,413     |
+| archive boundaries in the UI | 84d15a14 | 12,987 (147)    | 4,379  | 75 + 5  | 1,419     |
+| **drop the embedded server** | 9f078724 | 10,658 (127)    | 4,379  | 49 + 5  | 1,114     |
 
 Notes:
 
@@ -42,6 +45,23 @@ Notes:
   (depject, depnest, patch-settings) and 55 lockfile packages. Module
   wiring is now explicit: `grep "api\.sbot\."` shows the exact server
   surface the UI consumes — the input list for the erlbutt backend swap.
+- That backend swap is the last row, and it is where the lockfile finally
+  moved: −2,329 app lines, −20 files, −26 direct deps, −305 lockfile
+  packages. The 20 files are patchwork's server-side plugins — the
+  JavaScript reimplementation of threads, channels, likes, backlinks,
+  contacts, private feeds, profiles and search, all of which erlbutt's
+  silkpurse app now serves over muxrpc. The deps are secret-stack and the
+  ssb-server plugin ring it assembled, plus long-unused stragglers;
+  `style-resolve` moved the other way, promoted to a direct dep because
+  the vendored `lib/require-style.js` uses it and it had been riding in
+  transitively.
+- What is left of the ssb stack is all client-side: `ssb-client`/muxrpc
+  for the wire, `ssb-keys` for identity, `ssb-ref`/`ssb-sort`/
+  `ssb-markdown`/`ssb-mentions` as pure message utilities, `ssb-config`
+  for config assembly, and `ssb-room` for parsing invite codes.
+- The predicted win came in almost exactly as guessed one row earlier:
+  the note above expected the lockfile to move only when the embedded
+  server went, and it dropped 305 packages when it did.
 
 ## Older notes (pre-revival, 3.18.1 era)
 

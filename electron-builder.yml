@@ -14,6 +14,11 @@ npmRebuild: false
 files:
   - "**/*"
   - "!**/*~"
+  # Emacs lock files are DANGLING SYMLINKS (.#name -> user@host.pid).
+  # electron-builder stats every candidate, so one open buffer in the
+  # project root fails the whole build with a bare ENOENT.
+  - "!**/.#*"
+  - "!**/#*#"
   - "!dial.js"
   - "!peers.js"
   - "!moid"

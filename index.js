@@ -14,6 +14,7 @@ const Menu = electron.Menu;
 const extend = require("xtend");
 const ssbKeys = require("ssb-keys");
 const resolveErlbutt = require("./lib/erlbutt-config.js");
+const rc = require("rc");
 
 require("@electron/remote/main").initialize();
 
@@ -293,30 +294,24 @@ function fatal(message) {
 }
 
 function setupContext(appName, cb) {
-  ssbConfig = require("ssb-config/inject")(appName, {
-    blobsPort: 8989, // matches the blob shim
-  });
-
-  // The local secret is still read (and created on first run) because
-  // ssb-config's own defaults expect one, but it is NOT the identity this
-  // app uses — erlbutt's is, loaded below.  Listener, unix socket, room
-  // and gossip settings are all gone with the embedded server: nothing
-  // here accepts connections any more, it only makes one.
-  ssbConfig.keys = ssbKeys.loadOrCreateSync(
-    Path.join(ssbConfig.path, "secret"),
-  );
+  // Read the config SOURCES only — rc is what ssb-config uses underneath,
+  // so this sees the same files, env and argv, but without ssb-config's
+  // defaults.  That ordering is deliberate: ssb-config/defaults.js mints a
+  // fresh keypair into <path>/secret whenever config.keys is null, and
+  // that key is NOT the identity this app uses.  It used to be created on
+  // every first run and then immediately overwritten by erlbutt's — a
+  // stranger's private key sitting in the data directory looking like it
+  // meant something.  Resolving erlbutt first lets us hand inject the real
+  // keys, so the branch that would create it never runs.
+  const sources = rc(appName, {});
 
   // erlbutt is the only backend: this app is erlbutt's face, authenticating
   // as erlbutt's own identity and talking muxrpc to it.  Settings come from
   // the environment or from an "erlbutt" block in ~/.silkpurse/config (see
   // lib/erlbutt-config.js).
-  //
-  // The resolved block is stored on ssbConfig, so the background window
-  // (server-process.js) sees the same decision — it is handed the config,
-  // and cannot be assumed to inherit our environment.
   let erlbutt;
   try {
-    erlbutt = resolveErlbutt(ssbConfig);
+    erlbutt = resolveErlbutt(sources);
   } catch (err) {
     return fatal(err.message);
   }
@@ -338,8 +333,18 @@ function setupContext(appName, cb) {
     );
   }
 
+  // Listener, unix socket, room and gossip settings are all gone with the
+  // embedded server: nothing here accepts connections any more, it only
+  // makes one.
+  //
+  // The resolved erlbutt block is stored on ssbConfig, so the background
+  // window (server-process.js) sees the same decision — it is handed the
+  // config, and cannot be assumed to inherit our environment.
+  ssbConfig = require("ssb-config/inject")(appName, {
+    blobsPort: 8989, // matches the blob shim
+    keys: ssbKeys.loadSync(erlbutt.secret),
+  });
   ssbConfig.erlbutt = erlbutt;
-  ssbConfig.keys = ssbKeys.loadSync(erlbutt.secret);
   const ek = ssbConfig.keys;
   const epub = ek.id.slice(1).replace(`.${ek.curve}`, "");
   ssbConfig.remote = `net:${erlbutt.addr}~shs:${epub}`;

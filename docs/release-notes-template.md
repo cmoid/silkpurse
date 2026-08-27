@@ -58,7 +58,7 @@ upgrading from a release that ran its own server, that is the change: set
 up erlbutt first, and move your feed across with its
 `doc/ops/ssb-conversion.md` if you have an existing one.
 
-What stays on this machine is a search index and an unused keypair, both
+What stays on this machine is your settings and a search index, both
 disposable. Everything that matters lives in erlbutt, so back that up
 rather than this.
 

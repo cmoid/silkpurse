@@ -90,12 +90,25 @@ otherwise — holding two things:
 
 | Path | Contents |
 |---|---|
+| `config` | Your settings, including the `erlbutt` block. |
 | `full-text-search.<id>.sqlite` | The search index, built from erlbutt over muxrpc. Disposable: deleting it costs a rebuild and nothing else. |
-| `secret` | Created on first run and **never used**. Silkpurse authenticates as erlbutt's identity, not this one. It exists because the config library expects a keypair to be there. |
 
-Nothing else. Your messages, blobs, follows and identity all live in
-erlbutt, so a Silkpurse install is disposable — losing it costs you a
-search index.
+Nothing else — in particular, **no keypair**. Silkpurse authenticates as
+erlbutt's identity and has no use for one of its own. Your messages,
+blobs, follows and identity all live in erlbutt, so a Silkpurse install
+is disposable: losing it costs you a search index.
+
+If you have used Silkpurse before, you may find a `secret` file here
+anyway. Earlier versions created one because the config library mints a
+keypair whenever it is not given one, and it was then immediately
+replaced by erlbutt's — so it sat in the data directory looking
+significant while doing nothing. Current versions never create it.
+
+Deleting it is safe **if** every Silkpurse you have run was an
+erlbutt-backed one. If you go far enough back to a version that ran its
+own server, that file is the identity that server published as, and it is
+the only copy. When in doubt, move it somewhere safe rather than deleting
+it.
 
 The search index is named after the identity it indexed, so pointing the
 same install at two different erlbutt nodes keeps two indexes rather than

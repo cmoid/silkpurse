@@ -20,6 +20,53 @@ start a new cycle -- the stamper deliberately ignores the commented copy.
 ### Security
 -->
 
+## [Unreleased]
+
+Silkpurse is now a client. erlbutt holds the messages, does the
+replicating, and owns the identity you post as; **without one configured,
+Silkpurse says what it needs and quits.** That is the whole of this
+release, and why the version jumps.
+
+### Added
+- Archived feeds. A profile whose early history has been retired shows the
+  boundary, with what lies below it and what fetching costs; fetching
+  verifies the segment and folds it back in. Archives chain, so each fetch
+  recovers one layer and offers the next.
+- Intel Mac builds, alongside Apple silicon. Removing the embedded server
+  removed `leveldown`, which was the reason one machine could not build
+  both. Intel is Rosetta-verified only, not run on real hardware.
+
+### Changed
+- **The embedded server is gone.** No secret-stack, no ssb-db, no flume, no
+  server plugins -- 2,329 lines, 26 direct dependencies and 305 packages
+  removed. Blob serving and search indexing now run over muxrpc.
+- `ERLBUTT_SECRET` is required, not a mode switch. It names the secret of
+  the node you connect to, which is also the identity you post as.
+- LAN discovery belongs to erlbutt now.
+- Release artifacts carry an explicit architecture: `-arm64` and `-x64`.
+  x64 is electron-builder's default arch and its suffix was being stripped,
+  so Intel builds would have shipped unlabelled beside a labelled arm64.
+
+### Removed
+- The local keypair in the data directory. It was created on first run,
+  never used, and replaced by erlbutt's identity moments later. An existing
+  one is left alone -- on old enough versions it was a real identity.
+
+### Fixed
+- A cold search index could never finish. It asked for the whole corpus in
+  one muxrpc call, which cannot be answered inside the timeout, so the
+  connection died and the next attempt asked for exactly the same thing.
+  The backlog is paged now.
+- Posts whose `text` is not a string are indexed instead of dropped.
+- Mention suggestions are ranked: people in the thread first, then people
+  you follow. They were truncated before being ordered, so on a large store
+  the twenty you saw were effectively arbitrary -- and named messages and
+  gatherings appeared among the people.
+- The data directory is created explicitly. It used to be a side effect of
+  writing the unused keypair, so removing that left a new `ssb_appname`
+  with no directory and a search index that failed silently.
+- An Emacs lock file in the project root no longer fails the build.
+
 ## v0.1.0 - 2026-08-23
 
 The first Silkpurse release. Patchwork's final release was v3.18.1; this

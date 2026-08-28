@@ -20,7 +20,7 @@ start a new cycle -- the stamper deliberately ignores the commented copy.
 ### Security
 -->
 
-## [Unreleased]
+## v1.0.0 - 2026-08-28
 
 Silkpurse is now a client. erlbutt holds the messages, does the
 replicating, and owns the identity you post as; **without one configured,

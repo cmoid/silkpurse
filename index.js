@@ -4,6 +4,7 @@ process.on("uncaughtException", function (err) {
   process.exit();
 });
 
+const fs = require("fs");
 const electron = require("electron");
 const openWindow = require("./lib/window.js");
 
@@ -345,6 +346,17 @@ function setupContext(appName, cb) {
     keys: ssbKeys.loadSync(erlbutt.secret),
   });
   ssbConfig.erlbutt = erlbutt;
+
+  // Create the data directory.  This used to happen as a SIDE EFFECT of
+  // writing the local secret — ssb-keys' loadOrCreateSync mkdirp's the
+  // parent before writing — so removing that unused keypair removed the
+  // only mkdir in the app with it.  Nothing else creates the directory,
+  // and node:sqlite will not open a database inside one that is missing,
+  // so a new ssb_appname meant the search index died with
+  // ERR_SQLITE_ERROR in a hidden window: search simply never became
+  // available, with nothing on screen to say why.
+  fs.mkdirSync(ssbConfig.path, { recursive: true });
+
   const ek = ssbConfig.keys;
   const epub = ek.id.slice(1).replace(`.${ek.curve}`, "");
   ssbConfig.remote = `net:${erlbutt.addr}~shs:${epub}`;

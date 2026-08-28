@@ -1,0 +1,5 @@
+export ERLBUTT_SECRET=/tmp/ssb-nodeb/.ssberl/secret
+export ERLBUTT_ADDR=127.0.0.1:8009
+export ERLBUTT_SHS=1KHLiKZvAvjbY1ziZEHMXawbCEIM6qwjCDm3VYnaR/s=
+export ssb_appname=silkpurse-local-nodeb
+npm start

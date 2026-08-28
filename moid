@@ -1,5 +1,0 @@
-unset ERLBUTT_SECRET
-unset ERLBUTT_ADDR
-unset ERLBUTT_SHS
-export ssb_appname=silkpurse-moid
-npm start

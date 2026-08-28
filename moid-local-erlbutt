@@ -1,0 +1,5 @@
+export ERLBUTT_SECRET=~/.ssb-keys/moid/secret
+export ERLBUTT_ADDR=127.0.0.1:8008
+export ERLBUTT_SHS=1KHLiKZvAvjbY1ziZEHMXawbCEIM6qwjCDm3VYRan/s=
+export ssb_appname=silkpurse-moid-mainnet
+npm start

@@ -1,0 +1,45 @@
+#!/bin/sh
+# Run silkpurse against a local MAINNET erlbutt node.
+#
+#   ./prod-erlbutt moid
+#   ./prod-erlbutt moid 127.0.0.1:8010
+#
+# <name> is a directory under ~/.ssb-keys holding the NODE's secret, and it
+# also names the data directory (~/.silkpurse-<name>-mainnet), which keeps
+# each identity's settings and search index apart.
+#
+# ERLBUTT_SECRET must be the secret of the node you are connecting TO, not
+# merely a key you own: index.js uses it twice, once as the identity we
+# authenticate as and once to derive the pubkey we expect the node to
+# present.  A key belonging to anyone else fails the handshake.
+#
+# This script is MAINNET only.  The dev network id differs from the one
+# below by two transposed characters near the end ("naR" against "Ran"),
+# which is not something to check by eye — keep dev in its own script.
+set -e
+
+NAME=${1:?usage: $0 <name> [host:port]     (name = dir under ~/.ssb-keys)}
+ADDR=${2:-127.0.0.1:8008}
+SECRET="$HOME/.ssb-keys/$NAME/secret"
+
+if [ ! -f "$SECRET" ]; then
+    echo "$0: no secret at $SECRET" >&2
+    echo "  available:" >&2
+    ls "$HOME/.ssb-keys" 2>/dev/null | sed 's/^/    /' >&2
+    exit 1
+fi
+
+export ERLBUTT_SECRET="$SECRET"
+export ERLBUTT_ADDR="$ADDR"
+export ERLBUTT_SHS=1KHLiKZvAvjbY1ziZEHMXawbCEIM6qwjCDm3VYRan/s=
+export ssb_appname="silkpurse-$NAME-mainnet"
+
+# Say who we are about to be.  Two local nodes holding two identities is
+# exactly how a feed gets forked, and the difference is otherwise invisible
+# until something has already been published.
+echo "silkpurse -> $ADDR  (mainnet)"
+echo "  identity  $(sed -n 's/.*"id"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' "$SECRET" | head -1)"
+echo "  data dir  ~/.$ssb_appname"
+echo
+
+npm start

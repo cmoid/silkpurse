@@ -1,0 +1,5 @@
+export ERLBUTT_SECRET=~/code/erlbutt/_build/default/rel/ssb/.ssberl/secret
+export ERLBUTT_ADDR=127.0.0.1:8008
+export ERLBUTT_SHS=1KHLiKZvAvjbY1ziZEHMXawbCEIM6qwjCDm3VYnaR/s=
+export ssb_appname=silkpurse-local-dev
+npm start

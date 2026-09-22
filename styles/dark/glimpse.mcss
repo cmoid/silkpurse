@@ -1,0 +1,50 @@
+GlimpsePanel {
+  div.glimpse-quiet {
+    color: #8a8a8a
+  }
+}
+
+Glimpse {
+  background: #383736
+  border: 1px solid #4c4a48
+
+  div.glimpse-head {
+    div.glimpse-avatar {
+      div.glimpse-blank {
+        background: #4c4a48
+      }
+    }
+    div.glimpse-identity {
+      div.glimpse-name {
+        color: #dcdcdc
+      }
+      div.glimpse-where {
+        color: #9a9a9a
+      }
+    }
+    div.glimpse-action {
+      div.glimpse-status {
+        color: #b3b3b3
+      }
+    }
+  }
+
+  blockquote.glimpse-statement {
+    border-left: 3px solid #6a6663
+    color: #d2d2d2
+  }
+
+  div.glimpse-provenance {
+    border-top: 1px solid #4c4a48
+    div.glimpse-provenance-line {
+      color: #9a9a9a
+    }
+    div.glimpse-caveat {
+      color: #8a8a8a
+    }
+  }
+
+  div.glimpse-waiting {
+    color: #9a9a9a
+  }
+}

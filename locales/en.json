@@ -409,5 +409,22 @@
 	"Verifying earlier history…": "Verifying earlier history…",
 	"Still downloading — try again later.": "Still downloading — try again later.",
 	"The archive could not be read.": "The archive could not be read.",
-	"unknown": "unknown"
+	"unknown": "unknown",
+	"Nothing is known about this feed here.": "Nothing is known about this feed here.",
+	"Asking the network…": "Asking the network…",
+	"Fetching the summary…": "Fetching the summary…",
+	"Replicate this feed": "Replicate this feed",
+	"Stop replicating": "Stop replicating",
+	"Starting…": "Starting…",
+	"Stopping…": "Stopping…",
+	"No longer replicating.": "No longer replicating.",
+	"Replicating — posts will appear as they arrive.": "Replicating — posts will appear as they arrive.",
+	"Replicating at your request": "Replicating at your request",
+	"At the edge of your network": "At the edge of your network",
+	"Not replicated": "Not replicated",
+	"Self-described": "Self-described",
+	"relayed by a peer": "relayed by a peer",
+	"The author wrote this about themselves. Nobody has vouched for it, and it may not be the newest one.": "The author wrote this about themselves. Nobody has vouched for it, and it may not be the newest one.",
+	"What your feed says about itself": "What your feed says about itself",
+	"This is what someone at the edge of your network sees before deciding whether to read you.": "This is what someone at the edge of your network sees before deciding whether to read you."
 }

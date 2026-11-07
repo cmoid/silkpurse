@@ -56,7 +56,7 @@ elsewhere — and it renders what it finds.
 **Without one it will tell you what it needs and quit.** If you are
 upgrading from a release that ran its own server, that is the change: set
 up erlbutt first, and move your feed across with its
-`doc/ops/ssb-conversion.md` if you have an existing one.
+[Moving from SSB][erlbutt-convert] guide if you have an existing one.
 
 What stays on this machine is your settings and a search index, both
 disposable. Everything that matters lives in erlbutt, so back that up
@@ -105,4 +105,5 @@ reason:
 [patchwork]: https://github.com/ssbc/patchwork
 [ssb]: https://scuttlebutt.nz
 [erlbutt]: https://github.com/cmoid/erlbutt
+[erlbutt-convert]: https://github.com/cmoid/erlbutt/blob/main/doc/guide/moving-from-ssb.md
 [install]: https://github.com/cmoid/silkpurse/blob/theseus/docs/INSTALL.md

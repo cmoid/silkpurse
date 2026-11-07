@@ -79,9 +79,9 @@ somewhere else.
 
 **So there is nothing to install until you have an erlbutt node running**,
 and nothing useful happens without one: Silkpurse will tell you what it
-needs and quit. See erlbutt's own documentation for setting one up, and
-`doc/ops/ssb-conversion.md` there if you are moving an existing feed
-across from a JavaScript client.
+needs and quit. See erlbutt's [getting started guide][erlbutt-start] for
+setting one up, and [Moving from SSB][erlbutt-convert] if you are moving
+an existing feed across from a JavaScript client.
 
 ### What it does keep locally
 
@@ -241,3 +241,5 @@ release involves.
 [releases]: https://github.com/cmoid/silkpurse/releases
 [rc]: https://github.com/dominictarr/rc
 [erlbutt]: https://github.com/cmoid/erlbutt
+[erlbutt-start]: https://github.com/cmoid/erlbutt/blob/main/doc/guide/getting-started.md
+[erlbutt-convert]: https://github.com/cmoid/erlbutt/blob/main/doc/guide/moving-from-ssb.md
